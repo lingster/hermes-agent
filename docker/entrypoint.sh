@@ -43,4 +43,11 @@ export https_proxy="http://127.0.0.1:8080"
 export NO_PROXY="localhost,127.0.0.1"
 export no_proxy="localhost,127.0.0.1"
 
+# Configure encrypted keyring backend (isolated per profile via /opt/data).
+# Set KEYRING_MASTER_PASSWORD at container start for explicit key control,
+# otherwise a key is auto-generated and stored in $HERMES_HOME/.keyring_master.
+mkdir -p "$HERMES_HOME/keyring"
+export PYTHONPATH="$INSTALL_DIR/docker${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHON_KEYRING_BACKEND="hermes_keyring.HermesKeyring"
+
 exec hermes "$@"
