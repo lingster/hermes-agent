@@ -5,10 +5,6 @@ set -e
 HERMES_HOME="/opt/data"
 INSTALL_DIR="/opt/hermes"
 
-# Create essential directory structure.  Cache and platform directories
-# (cache/images, cache/audio, platforms/whatsapp, etc.) are created on
-# demand by the application — don't pre-create them here so new installs
-# get the consolidated layout from get_hermes_dir().
 mkdir -p "$HERMES_HOME"/{cron,sessions,logs,hooks,memories,skills}
 
 # .env
@@ -30,5 +26,21 @@ fi
 if [ -d "$INSTALL_DIR/skills" ]; then
     python3 "$INSTALL_DIR/tools/skills_sync.py"
 fi
+
+# Start httpcloak local proxy in the background to route all outgoing HTTP/HTTPS
+# traffic through a browser-fingerprint-emulating proxy on port 8080.
+python3 "$INSTALL_DIR/docker/start_proxy.py" \
+    >> "$HERMES_HOME/logs/httpcloak.log" 2>&1 &
+HTTPCLOAK_PID=$!
+
+# Give the proxy a moment to bind its port before hermes starts making requests.
+sleep 2
+
+export HTTP_PROXY="http://127.0.0.1:8080"
+export HTTPS_PROXY="http://127.0.0.1:8080"
+export http_proxy="http://127.0.0.1:8080"
+export https_proxy="http://127.0.0.1:8080"
+export NO_PROXY="localhost,127.0.0.1"
+export no_proxy="localhost,127.0.0.1"
 
 exec hermes "$@"
