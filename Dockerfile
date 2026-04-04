@@ -14,6 +14,8 @@ RUN pip install --no-cache-dir -e ".[all]" --break-system-packages && \
     pip install --no-cache-dir httpcloak keyring cryptography --break-system-packages && \
     npm install --prefer-offline --no-audit && \
     npx playwright install --with-deps chromium --only-shell && \
+    npm install -g dev-browser && \
+    dev-browser install && \
     cd /opt/hermes/scripts/whatsapp-bridge && \
     npm install --prefer-offline --no-audit && \
     npm cache clean --force
